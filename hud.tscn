@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://lvfsfao6ook"]
+
+[ext_resource type="Texture2D" uid="uid://dlym6t3u8ub5i" path="res://assets/hud/pngwing.com.png" id="1_37p78"]
+
+[node name="Hud" type="Node2D"]
+
+[node name="Pngwing_com" type="Sprite2D" parent="."]
+position = Vector2(-1.50001, -2.00002)
+scale = Vector2(0.901108, 1.01899)
+texture = ExtResource("1_37p78")
+
+[node name="Camera2D" type="Camera2D" parent="."]

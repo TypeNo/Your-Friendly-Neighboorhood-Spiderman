@@ -58,14 +58,17 @@ func _on_quit() -> void:
 func _update_location() -> void:
 	# Pick the location to set as our parent
 	var location : ControlPadLocation
+	
+		# Skip if no new location found
+	if not location:
+		return
+		
 	if _staging.control_pad_hand == "LEFT":
 		location = ControlPadLocation.find_left(self)
 	else:
 		location = ControlPadLocation.find_right(self)
 
-	# Skip if no new location found
-	if not location:
-		return
+
 
 	# Detach from current parent
 	if get_parent():

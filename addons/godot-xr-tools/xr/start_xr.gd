@@ -62,6 +62,18 @@ var _webxr_session_query : bool = false
 func _ready() -> void:
 	if !Engine.is_editor_hint():
 		_initialize()
+	# Check if primary_interface is null or invalid
+	if XRServer.primary_interface == null or !is_instance_valid(XRServer.primary_interface):
+		# Find the XRInputSimulator interface
+		var input_simulator := XRServer.find_interface("XRInputSimulator")
+		
+		if input_simulator != null:
+			XRServer.primary_interface = input_simulator
+			print("XRInputSimulator interface assigned as primary.")
+		else:
+			print("XRInputSimulator interface not found.")
+	else:
+		print("Primary interface is already valid: ", XRServer.primary_interface)
 
 
 ## Initialize the XR interface
@@ -75,13 +87,13 @@ func _initialize() -> bool:
 	xr_interface = XRServer.find_interface('WebXR')
 	if xr_interface:
 		return _setup_for_webxr()
+	
 
 	# No XR interface
 	xr_interface = null
 	print("No XR interface detected")
 	xr_failed_to_initialize.emit()
 	return false
-
 
 ## End the XR experience
 func end_xr() -> void:
