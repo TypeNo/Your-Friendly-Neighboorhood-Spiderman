@@ -12,23 +12,52 @@ func _ready():
 
 	var webxr_interface = XRServer.find_interface("WebXR")
 	if webxr_interface:
+		print("WebXR interface found.")
 		XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
 		_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
-		if basic_map:
-		# Find the Ground node (child of BasicMap)
-			var ground = basic_map.get_node("Ground")
-			
-			# If Ground node exists, get its MeshInstance3D
-			if ground:
-				ground_mesh = ground.get_node("MeshInstance3D")
-				
-				if ground_mesh and ground_mesh is MeshInstance3D:
-					var aabb = ground_mesh.get_transformed_aabb()
-					ground_size = aabb.size
-					ground_center = aabb.position + aabb.size * 0.5
+	else:
+		push_warning("WebXR interface not found.")
 
-					# Print size and center
-					print("Ground size:", ground_size, " | Center:", ground_center)
+	# Ensure basic_map is assigned (possibly by exporting it or assigning via script)
+	if not basic_map:
+		push_error("basic_map is not assigned.")
+		return
+
+	# Attempt to get the Ground node under BasicMap
+	if not basic_map.has_node("Ground"):
+		push_error("Ground node not found under BasicMap.")
+		return
+
+	var ground = basic_map.get_node("Ground")
+
+	# Try to get the MeshInstance3D
+	if not ground.has_node("MeshInstance3D"):
+		push_error("MeshInstance3D not found under Ground.")
+		return
+
+	ground_mesh = ground.get_node("MeshInstance3D") as MeshInstance3D
+
+	if ground_mesh and ground_mesh.mesh:
+		var local_aabb = ground_mesh.mesh.get_aabb()
+		var global_scale = ground_mesh.global_transform.basis.get_scale()
+		var aabb_size = local_aabb.size
+		var aabb_position = ground_mesh.global_transform.origin + local_aabb.position * global_scale
+
+
+		# Calculate the transformed corners of the AABB
+		var transformed_aabb = AABB(aabb_position, aabb_size)
+
+		ground_size = transformed_aabb.size
+		ground_center = transformed_aabb.position + transformed_aabb.size * 0.5
+
+		print("Ground size:", ground_size)
+		print("Ground center:", ground_center)
+
+		spawn_enemy()
+	else:
+		push_error("ground_mesh is not a valid MeshInstance3D or has no mesh.")
+
+
 
 
 func _on_webxr_primary_changed(webxr_primary: int) -> void:
@@ -47,21 +76,38 @@ func _on_webxr_primary_changed(webxr_primary: int) -> void:
 				if "rotation_action" in f:
 					f.rotation_action = action_name
 
-func is_spawnpoint_clear(spawn_point: Node3D) -> bool:
-	var area = spawn_point.get_node("Area3D")
-	var space_state = get_world_3d().direct_space_state
+func is_spawnpoint_clear(spawn_point: Node3D, exclude_colliders := []) -> bool:
+	var area: Area3D = spawn_point.get_node("Area3D")
+	var shape_node: CollisionShape3D = area.get_node("CollisionShape3D")
+	
+	if not shape_node or not shape_node.shape:
+		push_error("CollisionShape3D or its shape is missing!")
+		return false
 
-	var shape = area.get_shape(0)
-	var transform = area.global_transform
+	var shape = shape_node.shape
+	var transform = shape_node.global_transform
 
-	var result = space_state.intersect_shape(PhysicsShapeQueryParameters3D.new().apply({
-		shape = shape,
-		transform = transform,
-		collision_mask = area.collision_layer, # Adjust if needed
-		exclude = [area],
-	}))
+	# Debugging output
+	print("Checking spawn point at position:", spawn_point.global_transform.origin)
+	print("Collision shape transform:", transform.origin)
+	print("Excluded colliders:", exclude_colliders)
+
+	var query = PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = transform
+	query.exclude = [area, spawn_point] + exclude_colliders
+	query.collision_mask = area.collision_mask  # Optional
+
+	var result = get_world_3d().direct_space_state.intersect_shape(query)
+
+	if result.size() > 0:
+		print("Spawn point blocked by:", result)
+	else:
+		print("Spawn point is clear.")
 
 	return result.size() == 0
+
+
 
 
 func spawn_enemy():
@@ -73,32 +119,41 @@ func spawn_enemy():
 
 		# Choose a random point within bounds
 		var rand_x = randf_range(ground_center.x - ground_size.x/2, ground_center.x + ground_size.x/2)
-		var rand_z = randf_range(ground_center.z - ground_size.z/2, ground_center.z + ground_size.z/2)
-
+		var rand_z = randf_range(ground_center.z - ground_size.y/2, ground_center.z + ground_size.y/2)
 
 		var ray_origin = Vector3(rand_x, 1000, rand_z)
 		var ray_target = Vector3(rand_x, -1000, rand_z)
 
+		# Create ray query
 		var query = PhysicsRayQueryParameters3D.new()
 		query.from = ray_origin
 		query.to = ray_target
 
+		print("Attempting raycast from", ray_origin, "to", ray_target)
+
 		var result = get_world_3d().direct_space_state.intersect_ray(query)
 
+		if result and result.collider:
+			print("Ray hit:", result.collider.name, "Groups:", result.collider.get_groups())
 
-		if result and result.collider.is_in_group("ground"):
-			var spawn_pos = result.position
+			if result.collider.is_in_group("ground"):
+				var spawn_pos = result.position
+				print("Ground hit at:", spawn_pos)
+				var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
+				var enemy_node = get_tree().get_current_scene().find_child("Enemy", true, false)
+				if enemy_node:
+					enemy_node.add_child(spawn_point)
+					spawn_point.global_position = spawn_pos
+					print("Spawned successfully at:", spawn_point.global_position)
+				else:
+					push_error("Enemy node not found.")
 
-			var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
-			spawn_point.global_transform.origin = spawn_pos
-
-			if is_spawnpoint_clear(spawn_point):
-				get_node("Enemy").add_child(spawn_point)
-				print("Spawned successfully at:", spawn_pos)
-				return
+				if !is_spawnpoint_clear(spawn_point, [result.collider]):
+					spawn_point.queue_free()
+					print("Spawn overlap detected. Retrying...")
 			else:
-				spawn_point.queue_free() # Discard and try again
-				print("Spawn overlap detected. Retrying...")
+				print("Ray hit non-ground object:", result.collider.name)
+		else:
+			print("Raycast failed to hit anything.")
 
 	print("Failed to spawn enemy after", max_attempts, "attempts.")
-
