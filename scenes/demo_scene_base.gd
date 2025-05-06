@@ -101,4 +101,3 @@ func spawn_enemy():
 				print("Spawn overlap detected. Retrying...")
 
 	print("Failed to spawn enemy after", max_attempts, "attempts.")
-
