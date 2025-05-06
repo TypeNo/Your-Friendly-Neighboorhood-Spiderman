@@ -111,11 +111,13 @@ func is_spawnpoint_clear(spawn_point: Node3D, exclude_colliders := []) -> bool:
 
 
 func spawn_enemy():
-	var max_attempts = 10
-	var attempt = 0
+	#var max_attempts = 10
+	#var attempt = 0
+	var enemy_spawned = false
+	
 
-	while attempt < max_attempts:
-		attempt += 1
+	while !enemy_spawned:
+		#attempt += 1
 
 		# Choose a random point within bounds
 		var rand_x = randf_range(ground_center.x - ground_size.x/2, ground_center.x + ground_size.x/2)
@@ -145,6 +147,18 @@ func spawn_enemy():
 					enemy_node.add_child(spawn_point)
 					spawn_point.global_position = spawn_pos
 					print("Spawned successfully at:", spawn_point.global_position)
+					enemy_spawned = true
+					# Set reference to self (GrapplingDemo) dynamically
+					if "grappling_demo_path" in spawn_point:
+						spawn_point.grappling_demo_path = get_path()
+						if spawn_point.has_meta("grappling_demo_path") and spawn_point.grappling_demo_path != NodePath(""):
+							print("grappling_demo_path is assigned:", spawn_point.grappling_demo_path)
+						else:
+							print("grappling_demo_path is NOT assigned")
+					else:
+						push_error("grappling_demo_path not defined in SpawnPoint script.")
+
+
 				else:
 					push_error("Enemy node not found.")
 
@@ -156,4 +170,4 @@ func spawn_enemy():
 		else:
 			print("Raycast failed to hit anything.")
 
-	print("Failed to spawn enemy after", max_attempts, "attempts.")
+	#print("Failed to spawn enemy after", max_attempts, "attempts.")
