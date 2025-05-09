@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://dmw4el1cnbaxb"]
+
+[ext_resource type="Script" uid="uid://b6ctj7qe33abf" path="res://xr_tools_movement_swinging.gd" id="1_y4c33"]
+[ext_resource type="Material" path="res://addons/godot-xr-tools/materials/pointer.tres" id="2_el4qy"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_fgq7x"]
+resource_local_to_scene = true
+size = Vector3(0.05, 0.05, 0.05)
+subdivide_depth = 20
+
+[node name="XRToolsMovementGrapple" type="Node" groups=["movement_providers"]]
+script = ExtResource("1_y4c33")
+metadata/_custom_type_script = "uid://e4r7imk62mwf"
+
+[node name="Grapple_RayCast" type="RayCast3D" parent="."]
+collision_mask = 3
+debug_shape_custom_color = Color(0.862745, 0.278431, 0.278431, 1)
+debug_shape_thickness = 1
+
+[node name="Grapple_Target" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("BoxMesh_fgq7x")
+surface_material_override/0 = ExtResource("2_el4qy")
+
+[node name="LineHelper" type="Node3D" parent="."]
+
+[node name="Line" type="CSGCylinder3D" parent="LineHelper"]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 0, 0)
+radius = 0.02
