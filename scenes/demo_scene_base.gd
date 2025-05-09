@@ -147,7 +147,11 @@ func spawn_enemy():
 					enemy_node.add_child(spawn_point)
 					spawn_point.global_position = spawn_pos
 					print("Spawned successfully at:", spawn_point.global_position)
-					enemy_spawned = true
+					if !is_spawnpoint_clear(spawn_point, [result.collider]):
+						spawn_point.queue_free()
+						print("Spawn overlap detected. Retrying...")
+					else:
+						enemy_spawned = true
 					# Set reference to self (GrapplingDemo) dynamically
 					if "grappling_demo_path" in spawn_point:
 						spawn_point.grappling_demo_path = get_path()
@@ -162,9 +166,6 @@ func spawn_enemy():
 				else:
 					push_error("Enemy node not found.")
 
-				if !is_spawnpoint_clear(spawn_point, [result.collider]):
-					spawn_point.queue_free()
-					print("Spawn overlap detected. Retrying...")
 			else:
 				print("Ray hit non-ground object:", result.collider.name)
 		else:
