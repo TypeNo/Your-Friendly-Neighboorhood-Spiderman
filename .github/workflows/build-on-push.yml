@@ -1,0 +1,70 @@
+# Workflow to automatically create deliverables
+name: Build on push
+
+on:
+  [push, pull_request]
+
+jobs:
+  build:
+    name: Assembling artifacts
+    runs-on: ubuntu-latest
+
+    # Note, to satisfy the asset library we need to make sure our zip files have a root folder
+    # this is why we checkout into demo/godot-xr-tools
+    # and build plugin/godot-xr-tools
+    steps:
+      # Check out into demo/godot-xr-tools
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: demo/godot-xr-tools
+
+      # Assemble the plugin folder and clean up the demo folder
+      - name: Create XR tools plugin
+        run: |
+          mkdir plugin
+          mkdir plugin/godot-xr-tools
+          mkdir plugin/godot-xr-tools/addons
+          cp -r demo/godot-xr-tools/addons/godot-xr-tools plugin/godot-xr-tools/addons
+          cp demo/godot-xr-tools/LICENSE plugin/godot-xr-tools/addons/godot-xr-tools
+          cp demo/godot-xr-tools/CONTRIBUTORS.md plugin/godot-xr-tools/addons/godot-xr-tools
+          cp demo/godot-xr-tools/VERSIONS.md plugin/godot-xr-tools/addons/godot-xr-tools
+          rm -rf demo/godot-xr-tools/.git
+          rm -rf demo/godot-xr-tools/.github
+
+      # Upload plugin
+      - name: Create XR tools library artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-xr-tools
+          path: |
+            plugin
+
+      # Upload demo
+      - name: Create XR tools demo artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-xr-tools-demo
+          path: |
+            demo
+
+      # For tagged builds create the artifact zips
+      - name: Zip asset
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: |
+          cd plugin
+          zip -qq -r ../godot-xr-tools.zip godot-xr-tools
+          cd ../demo
+          zip -qq -r ../godot-xr-tools-demo.zip godot-xr-tools
+          cd ..
+
+      # For tagged builds create the release
+      - name: Create and upload asset
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: "godot-xr-tools.zip,godot-xr-tools-demo.zip"
+          omitNameDuringUpdate: true
+          omitBodyDuringUpdate: true
+          token: ${{ secrets.GITHUB_TOKEN }}

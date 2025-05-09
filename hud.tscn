@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3 uid="uid://lvfsfao6ook"]
+
+[ext_resource type="Script" uid="uid://df5sy1v3b5enq" path="res://hud.gd" id="1_64ctp"]
+[ext_resource type="Texture2D" uid="uid://cyqw44hn1vcoq" path="res://assets/hud/GUI.png" id="2_64ctp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_64ctp"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 1
+border_width_right = 1
+border_color = Color(1, 1, 1, 1)
+border_blend = true
+expand_margin_left = 3.0
+expand_margin_top = 3.0
+expand_margin_right = 3.0
+expand_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8sq4i"]
+bg_color = Color(1.75196e-05, 0.405103, 0.798691, 1)
+border_width_right = 5
+border_color = Color(0.14902, 0.352941, 1, 0.568627)
+
+[node name="Hud" type="Node2D"]
+script = ExtResource("1_64ctp")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+offset_left = -468.0
+offset_top = 174.0
+offset_right = -166.0
+offset_bottom = 189.0
+theme_override_styles/background = SubResource("StyleBoxFlat_64ctp")
+theme_override_styles/fill = SubResource("StyleBoxFlat_8sq4i")
+value = 100.0
+fill_mode = 1
+show_percentage = false
+
+[node name="GUI" type="Sprite2D" parent="."]
+position = Vector2(-3, -1)
+scale = Vector2(0.912975, 1.02215)
+texture = ExtResource("2_64ctp")

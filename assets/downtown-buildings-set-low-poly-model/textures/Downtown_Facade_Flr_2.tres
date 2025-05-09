@@ -1,0 +1,13 @@
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://c4886apq7i63e"]
+
+[ext_resource type="Texture2D" uid="uid://57n18bdu287" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Facade_FLR_2_Dif.jpeg" id="1_r4hua"]
+[ext_resource type="Texture2D" uid="uid://cbs8jd3fkkr4b" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Facade_FLR_2_Height.jpeg" id="2_jc60e"]
+[ext_resource type="Texture2D" uid="uid://cr34alexvmxxe" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Facade_FLR_2_Spec.jpeg" id="3_kv1cq"]
+[ext_resource type="Texture2D" uid="uid://dr1qthgci7qm3" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Facade_FLR_2_Rough.jpeg" id="4_ye8uk"]
+
+[resource]
+albedo_texture = ExtResource("1_r4hua")
+metallic_texture = ExtResource("3_kv1cq")
+roughness_texture = ExtResource("4_ye8uk")
+heightmap_enabled = true
+heightmap_texture = ExtResource("2_jc60e")
