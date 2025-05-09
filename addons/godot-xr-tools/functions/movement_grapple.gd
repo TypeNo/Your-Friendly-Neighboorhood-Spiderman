@@ -160,7 +160,8 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 	elif _grapple_button and !old_grapple_button and _is_raycast_valid():
 		hook_object = _grapple_raycast.get_collider()
 		hook_point = _grapple_raycast.get_collision_point()
-		hook_local = hook_point * hook_object.global_transform
+		#hook_local = hook_point * hook_object.global_transform
+		hook_local = hook_object.global_transform.affine_inverse() * hook_point
 		do_impulse = true
 		_set_grappling(true)
 
