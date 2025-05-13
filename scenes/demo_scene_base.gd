@@ -9,27 +9,28 @@ var ground_center: Vector3
 
 func _ready():
 	super()
-	var webxr_interface = XRServer.find_interface("WebXR")
-	if webxr_interface:
-		print("WebXR interface found.")
-		XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
-		_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
-	else:
-		push_warning("WebXR interface not found.")
+	#var webxr_interface = XRServer.find_interface("WebXR")
+	#if webxr_interface:
+	#	print("WebXR interface found.")
+	#	XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
+	#	_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
+	#	get_viewport().use_xr = true
+	#else:
+	#	push_warning("WebXR interface not found.")
 	
 	
-	# var xr_interface = XRServer.find_interface("OpenXR")
+	var xr_interface = XRServer.find_interface("OpenXR")
 	# 
-	# if xr_interface and xr_interface.is_initialized():
-	#     print("OpenXR initialized successfully")
+	if xr_interface and xr_interface.is_initialized():
+		print("OpenXR initialized successfully")
 	# 
 	#     # Turn off v-sync!
-	#     DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	# 
 	#     # Change our main viewport to output to the HMD
-	#     get_viewport().use_xr = true
-	#else:
-	#	print("OpenXR not initialized, please check if your headset is connected")
+		get_viewport().use_xr = true
+	else:
+		print("OpenXR not initialized, please check if your headset is connected")
 
 	# Ensure basic_map is assigned (possibly by exporting it or assigning via script)
 	if not basic_map:
@@ -139,8 +140,8 @@ func spawn_enemy():
 		var rand_x = randf_range(-100, 100)
 		var rand_z = randf_range(-100, 100)
 		
-		var ray_origin = Vector3(rand_x, 1000, rand_z)
-		var ray_target = Vector3(rand_x, -1000, rand_z)
+		var ray_origin = Vector3(rand_x, 150, rand_z)
+		var ray_target = Vector3(rand_x, -150, rand_z)
 
 		# Create ray query
 		var query = PhysicsRayQueryParameters3D.new()

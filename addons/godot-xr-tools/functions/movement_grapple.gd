@@ -146,7 +146,7 @@ func _physics_process(_delta : float):
 var _swing_button := false
 
 const MAX_ROPE_LENGTH :=10.0  # Max distance before rope snaps
-const SPRING_CONSTANT := 8.0   # Strength of swing tightening
+const SPRING_CONSTANT := 4.0   # Strength of swing tightening
 const TENSION_DAMPING := 0.2   # Swing damping factor
 var max_rope_length
 
@@ -207,7 +207,7 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 			var hook_vector = hook_point - player_pos
 			max_rope_length = 0.4 * hook_vector.length()
 			var hook_dir = hook_vector.normalized()
-			const GRAPPLE_IMPULSE_STRENGTH := 8.0
+			const GRAPPLE_IMPULSE_STRENGTH := 1.0
 			player_body.velocity += hook_dir * GRAPPLE_IMPULSE_STRENGTH
 
 	# Exit if not active
@@ -241,12 +241,12 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 
 	elif grapple_mode == "swing":
 		const SLACK_MARGIN := 0.5
-		var overstretch = hook_length - max_rope_length + SLACK_MARGIN
+		var overstretch = hook_length - MAX_ROPE_LENGTH + SLACK_MARGIN
 		if overstretch > 0.0:
 			var tension_force = hook_dir * overstretch * SPRING_CONSTANT
 			player_body.velocity += tension_force * delta
 
-		if hook_length < max_rope_length:
+		if hook_length < MAX_ROPE_LENGTH:
 			var v_radial = player_body.velocity.project(hook_dir)
 			var v_perpendicular = player_body.velocity - v_radial
 			if v_radial.dot(hook_dir) > 0:
@@ -257,6 +257,10 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 			player_body.velocity += hook_dir * 0.1
 		if hook_vector.dot(Vector3.UP) > 0.1:
 			player_body.velocity += hook_dir * 0.1
+
+		# Optional damping (comment out if you want maximum swing energy)
+		const TENSION_DAMPING := 4.0
+		player_body.velocity *= (1.0 - TENSION_DAMPING * delta)
 
 	# Final movement
 	player_body.velocity = player_body.move_player(player_body.velocity)
