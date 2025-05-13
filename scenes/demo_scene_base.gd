@@ -9,20 +9,27 @@ var ground_center: Vector3
 
 func _ready():
 	super()
-
-	var xr_interface: XRInterface
-
-	xr_interface = XRServer.find_interface("OpenXR")
-	if xr_interface and xr_interface.is_initialized():
-		print("OpenXR initialized successfully")
-
-		# Turn off v-sync!
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-
-		# Change our main viewport to output to the HMD
-		get_viewport().use_xr = true
+	var webxr_interface = XRServer.find_interface("WebXR")
+	if webxr_interface:
+		print("WebXR interface found.")
+		XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
+		_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
 	else:
-		print("OpenXR not initialized, please check if your headset is connected")
+		push_warning("WebXR interface not found.")
+	
+	
+	# var xr_interface = XRServer.find_interface("OpenXR")
+	# 
+	# if xr_interface and xr_interface.is_initialized():
+	#     print("OpenXR initialized successfully")
+	# 
+	#     # Turn off v-sync!
+	#     DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	# 
+	#     # Change our main viewport to output to the HMD
+	#     get_viewport().use_xr = true
+	#else:
+	#	print("OpenXR not initialized, please check if your headset is connected")
 
 	# Ensure basic_map is assigned (possibly by exporting it or assigning via script)
 	if not basic_map:
@@ -126,9 +133,12 @@ func spawn_enemy():
 		#attempt += 1
 
 		# Choose a random point within bounds
-		var rand_x = randf_range(ground_center.x - ground_size.x/2, ground_center.x + ground_size.x/2)
-		var rand_z = randf_range(ground_center.z - ground_size.y/2, ground_center.z + ground_size.y/2)
+		#var rand_x = randf_range(ground_center.x - ground_size.x/2, ground_center.x + ground_size.x/2)
+		#var rand_z = randf_range(ground_center.z - ground_size.y/2, ground_center.z + ground_size.y/2)
 
+		var rand_x = randf_range(-100, 100)
+		var rand_z = randf_range(-100, 100)
+		
 		var ray_origin = Vector3(rand_x, 1000, rand_z)
 		var ray_target = Vector3(rand_x, -1000, rand_z)
 
@@ -144,37 +154,37 @@ func spawn_enemy():
 		if result and result.collider:
 			print("Ray hit:", result.collider.name, "Groups:", result.collider.get_groups())
 
-			if result.collider.is_in_group("ground"):
-				var spawn_pos = result.position
-				print("Ground hit at:", spawn_pos)
-				var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
-				var enemy_node = get_tree().get_current_scene().find_child("Enemy", true, false)
-				if enemy_node:
-					enemy_node.add_child(spawn_point)
-					spawn_point.global_position = spawn_pos
-					print("Spawned successfully at:", spawn_point.global_position)
-					if !is_spawnpoint_clear(spawn_point, [result.collider]):
-						spawn_point.queue_free()
-						print("Spawn overlap detected. Retrying...")
-					else:
-						enemy_spawned = true
-					# Set reference to self (GrapplingDemo) dynamically
-					if "grappling_demo_path" in spawn_point:
-						spawn_point.grappling_demo_path = get_path()
-						if spawn_point.has_meta("grappling_demo_path") and spawn_point.grappling_demo_path != NodePath(""):
-							print("grappling_demo_path is assigned:", spawn_point.grappling_demo_path)
-						else:
-							print("grappling_demo_path is NOT assigned")
-					else:
-						push_error("grappling_demo_path not defined in SpawnPoint script.")
-
-
+			#if result.collider.is_in_group("ground"):
+			var spawn_pos = result.position
+			print("Ground hit at:", spawn_pos)
+			var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
+			var enemy_node = get_tree().get_current_scene().find_child("Enemy", true, false)
+			if enemy_node:
+				enemy_node.add_child(spawn_point)
+				spawn_point.global_position = spawn_pos
+				print("Spawned successfully at:", spawn_point.global_position)
+				if !is_spawnpoint_clear(spawn_point, [result.collider]):
+					spawn_point.queue_free()
+					print("Spawn overlap detected. Retrying...")
 				else:
-					push_error("Enemy node not found.")
+					enemy_spawned = true
+				# Set reference to self (GrapplingDemo) dynamically
+				if "grappling_demo_path" in spawn_point:
+					spawn_point.grappling_demo_path = get_path()
+					if spawn_point.has_meta("grappling_demo_path") and spawn_point.grappling_demo_path != NodePath(""):
+						print("grappling_demo_path is assigned:", spawn_point.grappling_demo_path)
+					else:
+						print("grappling_demo_path is NOT assigned")
+				else:
+					push_error("grappling_demo_path not defined in SpawnPoint script.")
+
 
 			else:
-				print("Ray hit non-ground object:", result.collider.name)
+				push_error("Enemy node not found.")
+
 		else:
-			print("Raycast failed to hit anything.")
+			print("Ray hit non-ground object:", result.collider.name)
+		#else:
+		#	print("Raycast failed to hit anything.")
 
 	#print("Failed to spawn enemy after", max_attempts, "attempts.")

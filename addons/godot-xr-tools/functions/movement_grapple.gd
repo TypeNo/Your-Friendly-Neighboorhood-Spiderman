@@ -37,7 +37,7 @@ const DEFAULT_ENABLE_MASK := 0b0000_0000_0000_0000_0000_0000_0001_0000
 @export var order : int = 20
 
 ## Grapple length - use to adjust maximum distance for possible grapple hooking.
-@export var grapple_length : float = 15.0
+@export var grapple_length : float = 20.0
 
 ## Grapple collision mask
 @export_flags_3d_physics var grapple_collision_mask : int = DEFAULT_COLLISION_MASK:
@@ -64,6 +64,7 @@ const DEFAULT_ENABLE_MASK := 0b0000_0000_0000_0000_0000_0000_0001_0000
 ## Grapple button (triggers grappling movement).  Be sure this button does not
 ## conflict with other functions.
 @export var grapple_button_action : String = "trigger_click"
+@export var swing_button_action : String = "grip_click"
 
 # Hook related variables
 var hook_object : Node3D = null
@@ -142,59 +143,125 @@ func _physics_process(_delta : float):
 		_line.visible = false
 
 
-# Perform grapple movement
-func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bool):
-	# Disable if requested
-	if disabled or !enabled or !_controller.get_is_active():
-		_set_grappling(false)
+var _swing_button := false
+
+const MAX_ROPE_LENGTH :=10.0  # Max distance before rope snaps
+const SPRING_CONSTANT := 8.0   # Strength of swing tightening
+const TENSION_DAMPING := 0.2   # Swing damping factor
+var max_rope_length
+
+# State transition
+func _set_swinging(active: bool) -> void:
+	if active == is_active:
 		return
 
-	# Update grapple button
-	var old_grapple_button := _grapple_button
-	_grapple_button = _controller.is_button_pressed(grapple_button_action)
+	is_active = active
+	if is_active:
+		emit_signal("swing_started")
+		print("swing_started")
+	else:
+		emit_signal("swing_finished")
+		print("swing_finished")
 
-	# Enable/disable grappling
-	var do_impulse := false
-	if is_active and !_grapple_button:
+
+
+# Called every physics frame
+func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bool):
+	if disabled or !enabled or !_controller.get_is_active():
 		_set_grappling(false)
-	elif _grapple_button and !old_grapple_button and _is_raycast_valid():
+		_set_swinging(false)
+		return
+
+	# Detect button states
+	var old_button := _grapple_button
+	var impulse_pressed := _controller.is_button_pressed(grapple_button_action)
+	var swing_pressed := _controller.is_button_pressed(swing_button_action)
+
+	# Set mode based on current button press
+	var grapple_mode := ""
+	if impulse_pressed:
+		grapple_mode = "impulse"
+	elif swing_pressed:
+		grapple_mode = "swing"
+
+	# Determine if any button is pressed
+	var button_pressed := impulse_pressed or swing_pressed
+	_grapple_button = button_pressed
+
+	# Trigger grappling/swinging
+	var do_impulse := false
+	if is_active and !button_pressed:
+		_set_grappling(false)
+		_set_swinging(false)
+	elif button_pressed and !old_button and _is_raycast_valid():
 		hook_object = _grapple_raycast.get_collider()
 		hook_point = _grapple_raycast.get_collision_point()
-		#hook_local = hook_point * hook_object.global_transform
 		hook_local = hook_object.global_transform.affine_inverse() * hook_point
-		do_impulse = true
-		_set_grappling(true)
 
-	# Skip if not grappling
+		if grapple_mode == "impulse":
+			do_impulse = true
+			_set_grappling(true)
+		elif grapple_mode == "swing":
+			_set_swinging(true)
+			var player_pos = _controller.global_transform.origin
+			var hook_vector = hook_point - player_pos
+			max_rope_length = 0.4 * hook_vector.length()
+			var hook_dir = hook_vector.normalized()
+			const GRAPPLE_IMPULSE_STRENGTH := 8.0
+			player_body.velocity += hook_dir * GRAPPLE_IMPULSE_STRENGTH
+
+	# Exit if not active
 	if !is_active:
 		return
 
-	# Get hook direction
+	# Validate hook
+	if !is_instance_valid(hook_object):
+		_set_grappling(false)
+		_set_swinging(false)
+		return
+
+	# Recalculate world-space hook point
 	hook_point = hook_object.global_transform * hook_local
-	var hook_vector := hook_point - _controller.global_transform.origin
-	var hook_length := hook_vector.length()
-	var hook_direction := hook_vector / hook_length
+	var player_pos = _controller.global_transform.origin
+	var hook_vector = hook_point - player_pos
+	var hook_length = hook_vector.length()
+	var hook_dir = hook_vector / hook_length
 
 	# Apply gravity
-	player_body.velocity += Vector3(0,-2,0) * delta
-	
+	player_body.velocity += player_body.gravity * delta
 
-	# Select the grapple speed
-	var speed := impulse_speed if do_impulse else winch_speed
-	if hook_length < 1.0:
-		speed = 0.0
+	if grapple_mode == "impulse":
+		var speed := impulse_speed if do_impulse else winch_speed
+		if hook_length < 1.0:
+			speed = 0.0
+		var vdot = player_body.velocity.dot(hook_dir)
+		if vdot < speed:
+			player_body.velocity += hook_dir * (speed - vdot)
+		player_body.velocity *= 1.0 - friction * delta
 
-	# Ensure velocity is at least winch_speed towards hook
-	var vdot = player_body.velocity.dot(hook_direction)
-	if vdot < speed:
-		player_body.velocity += hook_direction * (speed - vdot)
+	elif grapple_mode == "swing":
+		const SLACK_MARGIN := 0.5
+		var overstretch = hook_length - max_rope_length + SLACK_MARGIN
+		if overstretch > 0.0:
+			var tension_force = hook_dir * overstretch * SPRING_CONSTANT
+			player_body.velocity += tension_force * delta
 
-	# Scale down velocity
-	player_body.velocity *= 1.0 - friction * delta
+		if hook_length < max_rope_length:
+			var v_radial = player_body.velocity.project(hook_dir)
+			var v_perpendicular = player_body.velocity - v_radial
+			if v_radial.dot(hook_dir) > 0:
+				player_body.velocity = v_perpendicular
 
-	# Perform exclusive movement as we have dealt with gravity
+		# Optional swing boosters
+		if player_body.velocity.dot(Vector3.UP) > 0.1:
+			player_body.velocity += hook_dir * 0.1
+		if hook_vector.dot(Vector3.UP) > 0.1:
+			player_body.velocity += hook_dir * 0.1
+
+	# Final movement
 	player_body.velocity = player_body.move_player(player_body.velocity)
-	return true
+
+
 
 
 # Called when the grapple collision mask has been modified
@@ -216,8 +283,11 @@ func _set_grappling(active: bool) -> void:
 	# Report transition
 	if is_active:
 		emit_signal("grapple_started")
+		print("grapple_started")
 	else:
 		emit_signal("grapple_finished")
+		print("grapple_finished")
+
 
 
 # Test if the raycast is striking a valid target

@@ -482,4 +482,5 @@ texture = ExtResource("5_0h741")
 modulate = Color(1, 1, 1, 0.588235)
 offset_right = 141.0
 offset_bottom = 249.0
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("6_2yq3j")

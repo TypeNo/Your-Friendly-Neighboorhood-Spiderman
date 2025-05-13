@@ -5,18 +5,27 @@ var camera
 @onready var target_reticle = $TargetReticles
 @onready var offscreen_reticle = $OffscreenReticles
 @onready var mesh_instance = $Skeleton3D/Ch44  # Make sure this is correct
+@onready var tracking = false
 
 var target_height = 0.0
 var model_origin = Vector3.ZERO
 var model_center = Vector3.ZERO
 var reticle_offset = Vector2.ZERO
+var border_offset = Vector2(32,32)
+var viewport_center
+var max_reticle_position
 var time = 0.0  # Track time for animations
 var initialized = false  # Flag to ensure we initialize only once
 
 func _ready():
 	#_enemy_init_anim()
-	
+
+	var spawn_point = get_parent().get_parent()
+	if spawn_point.has_signal("player_entered"):
+		spawn_point.connect("player_entered", _on_player_entered)
 	camera = get_viewport().get_camera_3d()
+	viewport_center = Vector2(get_viewport().size)/2.0
+	max_reticle_position = viewport_center - border_offset
 
 	if camera:
 		print("Active Camera3D Node Name:", camera.name)
@@ -49,73 +58,90 @@ func _ready():
 		# Debug info to see if the parameter exists and its value
 		print("Initial rotation_angle:", target_reticle.material.get_shader_parameter("rotation_angle"))
 
+func _on_player_entered():
+	tracking = true
+
 func _process(delta):
 	if not camera:
 		return
 
 	time += delta  # Increment time for animations
 
-	if camera.is_position_in_frustum(global_position):
-		target_reticle.show()
-		offscreen_reticle.hide()
+	if tracking:
+		if camera.is_position_in_frustum(global_position):
+			target_reticle.show()
+			offscreen_reticle.hide()
 
-		var world_target_pos = global_position + model_center
+			var world_target_pos = global_position + model_center
 
-		# Calculate distance between camera and model center
-		var distance = camera.global_transform.origin.distance_to(world_target_pos)
+			# Calculate distance between camera and model center
+			var distance = camera.global_transform.origin.distance_to(world_target_pos)
 
-		# Scale factor: tweak base and divisor as needed
-		var base_size = 0.039  # Adjust to match your desired on-screen size
-		var scale_factor = base_size / distance  # Inverse relationship
+			# Scale factor: tweak base and divisor as needed
+			var base_size = 0.039  # Adjust to match your desired on-screen size
+			var scale_factor = base_size / distance  # Inverse relationship
 
-		# Optionally clamp to prevent too small or too large reticle
-		scale_factor = clamp(scale_factor, 0, base_size)
+			# Optionally clamp to prevent too small or too large reticle
+			scale_factor = clamp(scale_factor, 0, base_size)
 
-		# Add pulsing effect
-		var pulse_factor = 1.0 + 0.2 * sin(time * 2.0)  # Adjust 0.2 for pulse amplitude, 2.0 for speed
-		target_reticle.scale = Vector2.ONE * scale_factor * pulse_factor
+			# Add pulsing effect
+			var pulse_factor = 1.0 + 0.2 * sin(time * 2.0)  # Adjust 0.2 for pulse amplitude, 2.0 for speed
+			target_reticle.scale = Vector2.ONE * scale_factor * pulse_factor
 
-		# Set pivot to center of TextureRect (update after scale)
-		#target_reticle.pivot_offset = target_reticle.size* target_reticle.scale / 2
+			# Set pivot to center of TextureRect (update after scale)
+			#target_reticle.pivot_offset = target_reticle.size* target_reticle.scale / 2
 
-		# Add spinning effect for 2D node
-		var spin_speed = 90.0  # Degrees per second
-		#target_reticle.rotation_degrees = time * spin_speed
+			# Add spinning effect for 2D node
+			var spin_speed = 90.0  # Degrees per second
+			#target_reticle.rotation_degrees = time * spin_speed
 
-		# Update the shader's rotation angle (in degrees)
-		if target_reticle.material is ShaderMaterial:
-			# Ensure parameter exists and is initialized before updating it
-			if not initialized:
-				if target_reticle.material.get_shader_parameter("rotation_angle") == null:
-					target_reticle.material.set_shader_parameter("rotation_angle", 0.0)  # Set initial value
-					initialized = true  # Mark as initialized
-					print("rotation_angle initialized to 0.0")
+			# Update the shader's rotation angle (in degrees)
+			if target_reticle.material is ShaderMaterial:
+				# Ensure parameter exists and is initialized before updating it
+				if not initialized:
+					if target_reticle.material.get_shader_parameter("rotation_angle") == null:
+						target_reticle.material.set_shader_parameter("rotation_angle", 0.0)  # Set initial value
+						initialized = true  # Mark as initialized
+						#print("rotation_angle initialized to 0.0")
 
-			# Now, safely retrieve and update the parameter
-			var current_angle = target_reticle.material.get_shader_parameter("rotation_angle")
-			print("Current rotation_angle before update:", current_angle)  # Debug current angle
-			target_reticle.material.set_shader_parameter("rotation_angle", current_angle + spin_speed * delta)
+				# Now, safely retrieve and update the parameter
+				var current_angle = target_reticle.material.get_shader_parameter("rotation_angle")
+				#print("Current rotation_angle before update:", current_angle)  # Debug current angle
+				target_reticle.material.set_shader_parameter("rotation_angle", current_angle + spin_speed * delta)
 
-			# Debug updated value
-			print("Updated rotation_angle:", target_reticle.material.get_shader_parameter("rotation_angle"))
+				# Debug updated value
+				#print("Updated rotation_angle:", target_reticle.material.get_shader_parameter("rotation_angle"))
 
-		reticle_offset = target_reticle.size / 2 * target_reticle.scale
-		
-		var screen_pos = camera.unproject_position(world_target_pos)
-		target_reticle.set_global_position(screen_pos - reticle_offset)
+			reticle_offset = target_reticle.size / 2 * target_reticle.scale
+			
+			var screen_pos = camera.unproject_position(world_target_pos)
+			target_reticle.set_global_position(screen_pos - reticle_offset)
 
-		# Debug output
-		print("Debug Info from _process():")
-		print("- distance to camera:", distance)
-		print("- scale_factor:", scale_factor)
-		print("- pulse_factor:", pulse_factor)
-		print("- screen_pos:", screen_pos)
-		print("- target_pos:", target_reticle.global_position)
-		print("- reticle_offset:", reticle_offset)
-		print("- pivot_offset:", target_reticle.pivot_offset)
-	else:
-		target_reticle.hide()
-		offscreen_reticle.show()
+			# Debug output
+			#print("Debug Info from _process():")
+			#print("- distance to camera:", distance)
+			#print("- scale_factor:", scale_factor)
+			#print("- pulse_factor:", pulse_factor)
+			#print("- screen_pos:", screen_pos)
+			#print("- target_pos:", target_reticle.global_position)
+			#print("- reticle_offset:", reticle_offset)
+			#print("- pivot_offset:", target_reticle.pivot_offset)
+		else:
+			target_reticle.hide()
+			offscreen_reticle.show()
+			var local_to_camera = camera.to_local(global_position)
+			var reticle_position = Vector2(local_to_camera.x, -local_to_camera.y)
+			if reticle_position.abs().aspect() > viewport_center.aspect():
+				reticle_position *= max_reticle_position.x / abs(reticle_position.x)
+			else:
+				reticle_position *= viewport_center.y / abs(reticle_position.y)
+			offscreen_reticle.set_global_position(viewport_center + reticle_position - reticle_offset)
+			var angle = Vector2.UP.angle_to(reticle_position)
+			offscreen_reticle.rotation = -angle
+
+			print("local_to_camera:", local_to_camera)
+			print("reticle_pos_2d:", reticle_position)
+			print("offscreen reticle rotation:", offscreen_reticle.rotation)
 		
 func _enemy_init_anim():
 	var anim_player = $AnimationPlayer  # Reference to the AnimationPlayer node

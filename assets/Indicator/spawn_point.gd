@@ -8,26 +8,47 @@ extends Node3D
 @export var min_enemies := 3
 @export var max_enemies := 10
 
+signal player_entered
+
 func _ready():
 	print("SpawnPoint ready, connecting area signal.")
 	# Spawn enemies
 	_spawn_random_enemies()
+	_hide_reticles()  # Hide all reticles at the start
 	area.connect("body_entered", _on_body_entered)
+
+func _hide_reticles():
+	var enemies = get_node("Enemies").get_children()
+	for enemy in enemies:
+		if enemy.has_node("TargetReticles"):
+			enemy.get_node("TargetReticles").hide()
+		if enemy.has_node("OffscreenReticles"):
+			enemy.get_node("OffscreenReticles").hide()
+
+func _show_reticles():
+	var enemies = get_node("Enemies").get_children()
+	for enemy in enemies:
+		if enemy.has_node("TargetReticles"):
+			enemy.get_node("TargetReticles").show()
+		if enemy.has_node("OffscreenReticles"):
+			enemy.get_node("OffscreenReticles").show()
 
 func _on_body_entered(body):
 	print("Entered body:", body.name)
 	if body.name == "PlayerBody":  # Or body.is_in_group("player")
 		print("Player arrived at spawn point.")
-		if has_node(grappling_demo_path):
-			var grappling_demo = get_node(grappling_demo_path)
-			if grappling_demo:
-				grappling_demo.spawn_enemy()  # Call the function in GrapplingDemo
-				print("GrapplingDemo found!")
-		else:
-			push_error("GrapplingDemo not found.")
+		emit_signal("player_entered")
+
+	#	if has_node(grappling_demo_path):
+	#		var grappling_demo = get_node(grappling_demo_path)
+	#		if grappling_demo:
+	#			grappling_demo.spawn_enemy()  # Call the function in GrapplingDemo
+	#			print("GrapplingDemo found!")
+	#	else:
+	#		push_error("GrapplingDemo not found.")
 
 		# Remove this spawn point
-		queue_free()
+	#	queue_free()
 
 func _spawn_random_enemies():
 	if not enemy_scene:

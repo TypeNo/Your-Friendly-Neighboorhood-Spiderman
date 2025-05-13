@@ -10,6 +10,8 @@ subdivide_depth = 20
 
 [node name="XRToolsMovementGrapple" type="Node" groups=["movement_providers"]]
 script = ExtResource("1_y4c33")
+swing_button_action = "trigger_touch"
+swing_button_action = "trigger_touch"
 metadata/_custom_type_script = "uid://e4r7imk62mwf"
 
 [node name="Grapple_RayCast" type="RayCast3D" parent="."]

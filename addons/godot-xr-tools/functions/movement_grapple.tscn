@@ -10,6 +10,7 @@ subdivide_depth = 20
 
 [node name="MovementGrapple" type="Node3D" groups=["movement_providers"]]
 script = ExtResource("1")
+swing_button_action = null
 
 [node name="Grapple_RayCast" type="RayCast3D" parent="."]
 collision_mask = 3
