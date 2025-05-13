@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://bwkv3q0fvapaq"]
+
+[ext_resource type="PackedScene" uid="uid://vhtqagtfb4m4" path="res://assets/meshes/teleport/teleport.glb" id="1_u4nrt"]
+[ext_resource type="Material" uid="uid://k4vatr17hqlp" path="res://assets/meshes/teleport/teleport_area_metal.tres" id="2_llwet"]
+[ext_resource type="Material" uid="uid://dvmaun55bvv57" path="res://scenes/teleport_demo/objects/teleport_start_material.tres" id="2_u0g4l"]
+[ext_resource type="Shape3D" uid="uid://vweyq3qwvhpi" path="res://assets/meshes/teleport/teleport_area_base.shape" id="4_68ywf"]
+[ext_resource type="Shape3D" uid="uid://bxr6sjb8invtw" path="res://assets/meshes/teleport/teleport_area_top.shape" id="5_yeq7k"]
+
+[node name="TeleportAreaStart" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -10)
+
+[node name="teleport" parent="." instance=ExtResource("1_u4nrt")]
+
+[node name="Base" parent="teleport" index="0"]
+surface_material_override/0 = ExtResource("2_llwet")
+
+[node name="Top" parent="teleport" index="1"]
+surface_material_override/0 = ExtResource("2_llwet")
+surface_material_override/1 = ExtResource("2_llwet")
+
+[node name="Cylinder" parent="teleport" index="2"]
+surface_material_override/0 = ExtResource("2_u0g4l")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="BaseShape" type="CollisionShape3D" parent="StaticBody3D"]
+shape = ExtResource("4_68ywf")
+
+[node name="TopShape" type="CollisionShape3D" parent="StaticBody3D"]
+shape = ExtResource("5_yeq7k")
+
+[editable path="teleport"]

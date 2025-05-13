@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://bjs4fdhjhfcst"]
+
+[ext_resource type="Script" uid="uid://br1skt7cfh68y" path="res://rigid_body_3d.gd" id="1_a85iw"]
+[ext_resource type="PackedScene" uid="uid://cw47116y8oulq" path="res://web_effect.tscn" id="2_dgwo2"]
+[ext_resource type="Material" uid="uid://d1p1c1u42xlin" path="res://Materials/projectile.tres" id="2_qxf0c"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_qxf0c"]
+material = ExtResource("2_qxf0c")
+radius = 0.1
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_dgwo2"]
+
+[node name="RigidBody3D" type="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -0.999999, 0, 0.999999, -4.37113e-08, 0, 0, 0)
+collision_mask = 2
+script = ExtResource("1_a85iw")
+web_scene = ExtResource("2_dgwo2")
+vertical_offset = 0.3
+horizontal_offset = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.00684751, 2.49571e-11, -0.285735, -8.49099e-13, -0.0982392, -7.25906e-11, 1.17817, 7.50511e-14, -0.00166067, 0, 0, 0)
+mesh = SubResource("SphereMesh_qxf0c")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_dgwo2")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 5.0
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

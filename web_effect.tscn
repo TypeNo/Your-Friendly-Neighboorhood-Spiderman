@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://cw47116y8oulq"]
+
+[ext_resource type="Script" uid="uid://crj8orbqwnr63" path="res://webs.gd" id="1_shbno"]
+[ext_resource type="PackedScene" uid="uid://1uuha8334syy" path="res://cobwebs/scene.gltf" id="2_6dom2"]
+
+[node name="WebEffect" type="Node3D" groups=["web"]]
+transform = Transform3D(0.986794, 0, 0, 0, 0.986794, 0, 0, 0, 0.986794, 0, 0, 0)
+script = ExtResource("1_shbno")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+
+[node name="cobwebsmodel" parent="MeshInstance3D" instance=ExtResource("2_6dom2")]
+transform = Transform3D(0.517883, 0, 0, 0, 1, 0, 0, 0, 0.536975, 0, 0, 0)
+
+[node name="Sketchfab_Scene" parent="MeshInstance3D" instance=ExtResource("2_6dom2")]
+transform = Transform3D(0.517883, 0, 0, 0, 1, 0, 0, 0, 0.536975, 0, 0, 0)
+
+[node name="cobwebsmodel2" parent="MeshInstance3D" instance=ExtResource("2_6dom2")]
+transform = Transform3D(0.517883, 0, 0, 0, 1, 0, 0, 0, 0.536975, 0, 0, 0)
+
+[node name="cobwebsmodel3" parent="MeshInstance3D" instance=ExtResource("2_6dom2")]
+transform = Transform3D(0.517883, 0, 0, 0, 1, 0, 0, 0, 0.536975, 0, 0, 0)
+
+[node name="cobwebsmodel4" parent="MeshInstance3D" instance=ExtResource("2_6dom2")]
+transform = Transform3D(0.521968, 0, 0, 0, 1.00789, 0, 0, 0, 0.54121, 0, 0, 0)
+
+[node name="Timer" type="Timer" parent="."]
