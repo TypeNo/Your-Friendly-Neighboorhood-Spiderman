@@ -1,0 +1,13 @@
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://cwmmjd2uirlrt"]
+
+[ext_resource type="Texture2D" uid="uid://do65c2xnt41ai" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Modern_Firstfloor_FLR_1_dif.jpeg" id="1_mx7at"]
+[ext_resource type="Texture2D" uid="uid://cgrsiyvacaipu" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Modern_Firstfloor_FLR_1_Height.jpeg" id="2_uaglm"]
+[ext_resource type="Texture2D" uid="uid://m2rh5byrq2l0" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Modern_Firstfloor_FLR_1_Spec.jpeg" id="3_omqaa"]
+[ext_resource type="Texture2D" uid="uid://vjbuap6efi6c" path="res://assets/downtown-buildings-set-low-poly-model/textures/Downtown_Modern_Firstfloor_FLR_1_Rough.jpeg" id="4_o3qm4"]
+
+[resource]
+albedo_texture = ExtResource("1_mx7at")
+metallic_texture = ExtResource("3_omqaa")
+roughness_texture = ExtResource("4_o3qm4")
+heightmap_enabled = true
+heightmap_texture = ExtResource("2_uaglm")
