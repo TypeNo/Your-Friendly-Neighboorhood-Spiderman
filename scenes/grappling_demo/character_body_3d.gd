@@ -1,10 +1,11 @@
 extends CharacterBody3D
 
 @export var anim_player: AnimationPlayer
-@export var speed := 4.0
+@export var speed := 2.0
 @export var attack_range := 2.0
 @export var attack_cooldown := 1.0
-@export var follow_delay := 1  # seconds to wait before chasing again
+@export var follow_delay := 1.5  # seconds to wait before chasing again
+@export var follow_range:= 10
 @export var damage := 5.0
 
 var health := 100.0
@@ -17,7 +18,8 @@ var hurt_animations = ["enemy/hitted", "enemy/hitted 2"]
 
 var player
 var prev_in_range := false
-var can_follow := true
+var player_in_follow_range:=false
+var can_follow := false
 var follow_timer: Timer
 
 func _ready():
@@ -47,19 +49,31 @@ func _physics_process(delta):
 	var distance = to_player.length()
 	var direction = to_player.normalized()
 	var in_range = distance <= attack_range
+	var in_range_to_follow = distance <= follow_range
 
-	# detect range transitions to kick off follow‐delay
-	if in_range and not prev_in_range:
-		# just entered attack range → stop follow‐delay, allow follow on exit
+	print("distance to player", distance, "follow range", follow_range)
+	print("in_range_to_follow:", in_range_to_follow)
+	if in_range_to_follow: # detect range transitions to kick off follow‐delay
+		print("yippeeee")
 		can_follow = true
-		if follow_timer.is_stopped() == false:
-			follow_timer.stop()
-	elif not in_range and prev_in_range:
-		# just exited attack range → block follow until timer fires
+		player_in_follow_range= true
+		
+		
+		if in_range and not prev_in_range:
+			# just entered attack range → stop follow‐delay, allow follow on exit
+			
+			if follow_timer.is_stopped() == false:
+				follow_timer.stop()
+		elif not in_range and prev_in_range:
+			# just exited attack range → block follow until timer fires
+			can_follow = false
+			follow_timer.start()
+		prev_in_range = in_range
+		
+	else:
 		can_follow = false
-		follow_timer.start()
-	prev_in_range = in_range
-
+		player_in_follow_range= false
+		_update_idle_run_animation()
 	# rotate to face player
 	look_at(player.global_position, Vector3.UP)
 	rotate_y(deg_to_rad(180))  # only if your mesh is +Z-forward
@@ -76,16 +90,16 @@ func _physics_process(delta):
 		velocity = Vector3.ZERO
 
 	move_and_slide()
-	_update_idle_run_animation(distance)
+	_update_idle_run_animation()
 
 func _on_follow_delay_timeout():
 	can_follow = true
 
-func _update_idle_run_animation(distance):
+func _update_idle_run_animation():
 	# if neither attacking nor locked by hurt/death, play idle/run
 	if attacking or animation_locked:
 		return
-	if distance > attack_range:
+	if player_in_follow_range:
 		_play_anim("enemy/Running")
 	else:
 		_play_anim("enemy/enemyidle")

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b575f2cgkv208"]
+
+[ext_resource type="PackedScene" uid="uid://c8loxp54vqvbv" path="res://Models/brute.fbx" id="1_j2h6j"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_erpq4"]
+size = Vector3(0.5, 0.2, 0.55)
+
+[node name="brute" instance=ExtResource("1_j2h6j")]
+
+[node name="Area3D" type="Area3D" parent="Skeleton3D/BattleAxe_GEO" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.37212, 1.65131, 0.608598)
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Skeleton3D/BattleAxe_GEO/Area3D" index="0"]
+shape = SubResource("BoxShape3D_erpq4")

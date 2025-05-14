@@ -7,11 +7,17 @@ extends Area3D
 @export var controller_node: XRController3D  # assign this in the editor to the correct controller
 
 var controller_velocity := Vector3.ZERO
-
+var previous_position := Vector3.ZERO  # 🔧 NEW
 
 func _physics_process(delta):
+	print("checking controller")
 	if controller_node:
-		controller_velocity = controller_node.velocity
+		print("controller found")
+		var current_position = controller_node.global_position
+		controller_velocity = (current_position - previous_position) / delta  # 🔧 REPLACED .velocity
+		previous_position = current_position  # 🔧 TRACK PREVIOUS POSITION
+		print("Controller Pos:", controller_node.global_position)
+		print("Area3D Pos:", global_position)
 
 func _on_body_entered(body):
 	print("we are in main body entered")
@@ -23,21 +29,19 @@ func _on_body_entered(body):
 			max_damage
 		)
 		
-		
-		
 		body.take_damage(damage)
-		# Calculate push force (velocity-based)
+
 		var push_direction = (body.global_position - global_position).normalized()
 		var velocity_bonus = clamp(speed / max_damage_velocity, 0.5, 2.0)
 		
-		# Apply force
 		if body is RigidBody3D:
 			body.apply_central_impulse(push_direction * damage * velocity_bonus)
-			print("Punch velocity: ", speed, " | Damage: ", damage)
+
+		print("Punch velocity: ", speed, " | Damage: ", damage)
 
 		DebugDraw3D.draw_line(
-		global_position,
-		global_position + controller_velocity,
-		Color.RED,
-		0.1
-)
+			global_position,
+			global_position + controller_velocity,
+			Color.RED,
+			0.1
+		)
