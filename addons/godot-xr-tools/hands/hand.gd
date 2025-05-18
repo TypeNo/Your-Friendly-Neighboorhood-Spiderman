@@ -475,3 +475,6 @@ static func _find_child(node : Node, type : String) -> Node:
 
 	# No child found matching type
 	return null
+	
+func take_damage(amount):
+	print("OUCH! Took", amount, "damage!")

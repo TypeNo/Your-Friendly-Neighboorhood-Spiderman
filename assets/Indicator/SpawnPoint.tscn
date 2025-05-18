@@ -3,18 +3,21 @@
 [ext_resource type="Script" uid="uid://8rhoc6hkpxnb" path="res://assets/Indicator/waypoint.gd" id="1_3ifc3"]
 [ext_resource type="Script" uid="uid://cgmhmkl1xoieq" path="res://assets/Indicator/spawn_point.gd" id="1_gyyiv"]
 [ext_resource type="Texture2D" uid="uid://byilmxixytvki" path="res://assets/Indicator/NavIndicator.png" id="2_gyyiv"]
-[ext_resource type="PackedScene" uid="uid://b224b7u3m8jjg" path="res://assets/Model/Enemy/Enemy.tscn" id="6_3142f"]
+[ext_resource type="PackedScene" uid="uid://c1selqg1pdpd5" path="res://assets/Model/Hostage/HostageModel.tscn" id="2_vq8h4"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_okxr5"]
 
 [node name="SpawnPoint" type="Node3D"]
 script = ExtResource("1_gyyiv")
-enemy_scene = ExtResource("6_3142f")
+enemy_scene = ExtResource("2_vq8h4")
+min_enemies = 1
+max_enemies = 1
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
 [node name="Control" type="Control" parent="CanvasLayer"]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3ifc3")
@@ -40,3 +43,5 @@ transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
 shape = SubResource("SphereShape3D_okxr5")
 
 [node name="Enemies" type="Node3D" parent="."]
+
+[node name="Hostage" parent="Enemies" instance=ExtResource("2_vq8h4")]

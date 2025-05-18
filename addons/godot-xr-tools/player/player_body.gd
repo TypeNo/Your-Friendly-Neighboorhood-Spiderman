@@ -814,7 +814,10 @@ func _guaranteed_physics():
 
 	# Return the guaranteed-valid physics
 	return valid_physics
-
+	
+func take_damage(amount):
+	print("OUCH! Took ", amount, " damage!")
+	# Add health system later
 # This method verifies the XRToolsPlayerBody has a valid configuration. Specifically it
 # checks the following:
 # - XROrigin3D can be identified
@@ -867,4 +870,4 @@ static func find_instance(node: Node) -> XRToolsPlayerBody:
 	return XRTools.find_xr_child(
 		XRHelpers.get_xr_origin(node),
 		"*",
-		"XRToolsPlayerBody") as XRToolsPlayerBody
+		"XRToolsPlayerBody") as XRToolsPlayerBody	

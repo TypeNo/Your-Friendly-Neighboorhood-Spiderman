@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3 uid="uid://csuirh32bpnl0"]
+
+[ext_resource type="Script" uid="uid://yyehubib07bq" path="res://assets/Indicator/enemy_spawn_point.gd" id="1_eycov"]
+[ext_resource type="PackedScene" uid="uid://dyhxnhlctiob" path="res://assets/Model/Enemy/AIEnemy2.tscn" id="2_6hukm"]
+[ext_resource type="Script" uid="uid://8rhoc6hkpxnb" path="res://assets/Indicator/waypoint.gd" id="3_kyhas"]
+[ext_resource type="Texture2D" uid="uid://byilmxixytvki" path="res://assets/Indicator/NavIndicator.png" id="4_aa51f"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_okxr5"]
+
+[node name="SpawnPoint" type="Node3D"]
+script = ExtResource("1_eycov")
+enemy_scene = ExtResource("2_6hukm")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("3_kyhas")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Control/VBoxContainer"]
+layout_mode = 2
+texture = ExtResource("4_aa51f")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="CanvasLayer/Control/VBoxContainer"]
+layout_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_okxr5")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="CharacterBody3D" parent="Enemies" instance=ExtResource("2_6hukm")]

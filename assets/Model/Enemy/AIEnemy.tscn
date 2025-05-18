@@ -1,0 +1,50 @@
+[gd_scene load_steps=13 format=3 uid="uid://c8k418g1hamq3"]
+
+[ext_resource type="Script" uid="uid://loj0yjcdla5" path="res://scenes/grappling_demo/character_body_3d.gd" id="1_s61qq"]
+[ext_resource type="PackedScene" uid="uid://c8loxp54vqvbv" path="res://Models/brute.fbx" id="2_n21xg"]
+[ext_resource type="Animation" uid="uid://bpfh7hh26aek3" path="res://Animations/Attack.res" id="3_x26w1"]
+[ext_resource type="Animation" uid="uid://r8m8tysf6fwa" path="res://Animations/Attack 2.res" id="4_8xk1v"]
+[ext_resource type="Animation" uid="uid://fngd5dvyc5m6" path="res://Animations/Attack 3.res" id="5_0t45b"]
+[ext_resource type="Animation" uid="uid://ckkhb1uvjeyf6" path="res://Animations/Death.res" id="6_dgvga"]
+[ext_resource type="Animation" uid="uid://c5jdxhpqqplp5" path="res://Animations/Running.res" id="7_pxht5"]
+[ext_resource type="Animation" uid="uid://bk6oikg3lncgq" path="res://Animations/enemyidle.res" id="8_gqsvm"]
+[ext_resource type="Animation" uid="uid://c1y7un70xe8r3" path="res://Animations/hitted.res" id="9_csoc1"]
+[ext_resource type="Animation" uid="uid://jpe8swilvyng" path="res://Animations/hitted 2.res" id="10_rpfpu"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ux8qw"]
+radius = 0.55
+height = 2.6
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_k2uno"]
+_data = {
+&"Attack": ExtResource("3_x26w1"),
+&"Attack 2": ExtResource("4_8xk1v"),
+&"Attack 3": ExtResource("5_0t45b"),
+&"Death": ExtResource("6_dgvga"),
+&"Running": ExtResource("7_pxht5"),
+&"enemyidle": ExtResource("8_gqsvm"),
+&"hitted": ExtResource("9_csoc1"),
+&"hitted 2": ExtResource("10_rpfpu")
+}
+
+[node name="CharacterBody3D" type="CharacterBody3D" node_paths=PackedStringArray("anim_player") groups=["enemy"]]
+collision_layer = 2
+collision_mask = 21
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+script = ExtResource("1_s61qq")
+anim_player = NodePath("AnimationPlayer2")
+
+[node name="Hitbox enemy" type="CollisionShape3D" parent="." groups=["enemy"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.901331, 0)
+shape = SubResource("CapsuleShape3D_ux8qw")
+
+[node name="brute" parent="." groups=["enemy"] instance=ExtResource("2_n21xg")]
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="."]
+root_node = NodePath("../brute")
+libraries = {
+&"enemy": SubResource("AnimationLibrary_k2uno")
+}
+autoplay = "enemy/enemyidle"

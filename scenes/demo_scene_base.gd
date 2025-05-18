@@ -6,6 +6,7 @@ extends XRToolsSceneBase
 var ground_mesh: MeshInstance3D
 var ground_size: Vector3
 var ground_center: Vector3
+@export var punch_area: Area3D
 
 func _ready():
 	super()
@@ -137,8 +138,8 @@ func spawn_enemy():
 		#var rand_x = randf_range(ground_center.x - ground_size.x/2, ground_center.x + ground_size.x/2)
 		#var rand_z = randf_range(ground_center.z - ground_size.y/2, ground_center.z + ground_size.y/2)
 
-		var rand_x = randf_range(-100, 100)
-		var rand_z = randf_range(-100, 100)
+		var rand_x = randf_range(150, -150)
+		var rand_z = randf_range(150, -150)
 		
 		var ray_origin = Vector3(rand_x, 150, rand_z)
 		var ray_target = Vector3(rand_x, -150, rand_z)
@@ -155,37 +156,45 @@ func spawn_enemy():
 		if result and result.collider:
 			print("Ray hit:", result.collider.name, "Groups:", result.collider.get_groups())
 
-			#if result.collider.is_in_group("ground"):
-			var spawn_pos = result.position
-			print("Ground hit at:", spawn_pos)
-			var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
-			var enemy_node = get_tree().get_current_scene().find_child("Enemy", true, false)
-			if enemy_node:
-				enemy_node.add_child(spawn_point)
-				spawn_point.global_position = spawn_pos
-				print("Spawned successfully at:", spawn_point.global_position)
-				if !is_spawnpoint_clear(spawn_point, [result.collider]):
-					spawn_point.queue_free()
-					print("Spawn overlap detected. Retrying...")
-				else:
-					enemy_spawned = true
-				# Set reference to self (GrapplingDemo) dynamically
-				if "grappling_demo_path" in spawn_point:
-					spawn_point.grappling_demo_path = get_path()
-					if spawn_point.has_meta("grappling_demo_path") and spawn_point.grappling_demo_path != NodePath(""):
-						print("grappling_demo_path is assigned:", spawn_point.grappling_demo_path)
+			if result.collider.is_in_group("ground"):
+				var spawn_pos = result.position
+				print("Ground hit at:", spawn_pos)
+				var spawn_point = preload("res://assets/Indicator/SpawnPoint.tscn").instantiate()
+				var enemy_node = get_tree().get_current_scene().find_child("Enemy", true, false)
+				if enemy_node:
+					enemy_node.add_child(spawn_point)
+					spawn_point.global_position = spawn_pos
+					print("Spawned successfully at:", spawn_point.global_position)
+					if !is_spawnpoint_clear(spawn_point, [result.collider]):
+						spawn_point.queue_free()
+						print("Spawn overlap detected. Retrying...")
 					else:
-						print("grappling_demo_path is NOT assigned")
-				else:
-					push_error("grappling_demo_path not defined in SpawnPoint script.")
+						enemy_spawned = true
+					# Set reference to self (GrapplingDemo) dynamically
+					if "grappling_demo_path" in spawn_point:
+						spawn_point.grappling_demo_path = get_path()
+						if spawn_point.has_meta("grappling_demo_path") and spawn_point.grappling_demo_path != NodePath(""):
+							print("grappling_demo_path is assigned:", spawn_point.grappling_demo_path)
+						else:
+							print("grappling_demo_path is NOT assigned")
+					else:
+						push_error("grappling_demo_path not defined in SpawnPoint script.")
 
+
+				else:
+					push_error("Enemy node not found.")
 
 			else:
-				push_error("Enemy node not found.")
-
+				print("Ray hit non-ground object:", result.collider.name)
 		else:
-			print("Ray hit non-ground object:", result.collider.name)
-		#else:
-		#	print("Raycast failed to hit anything.")
+			print("Raycast failed to hit anything.")
 
 	#print("Failed to spawn enemy after", max_attempts, "attempts.")
+
+
+func _on_area_3d_body_entered(body: Node3D):
+	print("Signal received, body entered:", body.name)
+	if body.is_in_group("enemy"):
+		if punch_area and punch_area.has_method("_on_body_entered"):
+			print("Calling apply_punch_damage...")
+			punch_area._on_body_entered(body)

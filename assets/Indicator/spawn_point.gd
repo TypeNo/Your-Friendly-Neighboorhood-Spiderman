@@ -39,16 +39,16 @@ func _on_body_entered(body):
 		print("Player arrived at spawn point.")
 		emit_signal("player_entered")
 
-	#	if has_node(grappling_demo_path):
-	#		var grappling_demo = get_node(grappling_demo_path)
-	#		if grappling_demo:
-	#			grappling_demo.spawn_enemy()  # Call the function in GrapplingDemo
-	#			print("GrapplingDemo found!")
-	#	else:
-	#		push_error("GrapplingDemo not found.")
+		if has_node(grappling_demo_path):
+			var grappling_demo = get_node(grappling_demo_path)
+			#if grappling_demo:
+			#	grappling_demo.spawn_enemy()  # Call the function in GrapplingDemo
+			#	print("GrapplingDemo found!")
+			#else:
+			#	push_error("GrapplingDemo not found.")
 
-		# Remove this spawn point
-	#	queue_free()
+			# Remove this spawn point
+			queue_free()
 
 func _spawn_random_enemies():
 	if not enemy_scene:

@@ -1,18 +1,22 @@
-[gd_scene load_steps=43 format=3 uid="uid://bgfw0stwelkt8"]
+[gd_scene load_steps=60 format=3 uid="uid://bgfw0stwelkt8"]
 
 [ext_resource type="PackedScene" uid="uid://qbmx03iibuuu" path="res://addons/godot-xr-tools/staging/scene_base.tscn" id="1"]
 [ext_resource type="PackedScene" uid="uid://c78tjrtiyqna8" path="res://addons/godot-xr-tools/functions/movement_grapple.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="2_7xgbg"]
 [ext_resource type="Script" uid="uid://c2r3xtcom7150" path="res://scenes/demo_scene_base.gd" id="2_lm0po"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="3"]
+[ext_resource type="Script" uid="uid://cfn6typ8o4umy" path="res://scenes/grappling_demo/xr_origin_3d.gd" id="3_iuiv0"]
 [ext_resource type="PackedScene" uid="uid://bxm1ply47vaan" path="res://addons/godot-xr-tools/functions/movement_climb.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://bjcxf427un2wp" path="res://addons/godot-xr-tools/player/poke/poke.tscn" id="4_qshxt"]
 [ext_resource type="PackedScene" uid="uid://c2q5phg8w08o" path="res://addons/godot-xr-tools/functions/movement_jump.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://bjs4fdhjhfcst" path="res://projectile.tscn" id="5_r85co"]
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="6_n2v2n"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="7"]
 [ext_resource type="PackedScene" uid="uid://b4ysuy43poobf" path="res://addons/godot-xr-tools/functions/function_pickup.tscn" id="8"]
 [ext_resource type="PackedScene" uid="uid://bwr0eqi231lf0" path="res://assets/meshes/control_pad/control_pad_location_left.tscn" id="8_bqtqi"]
 [ext_resource type="PackedScene" uid="uid://cvokcudrffkgc" path="res://addons/godot-xr-tools/functions/movement_glide.tscn" id="9"]
+[ext_resource type="Script" uid="uid://bid0v7q66d1iy" path="res://scenes/grappling_demo/area_3d.gd" id="9_os25x"]
+[ext_resource type="Script" uid="uid://dcl1o6a5johlj" path="res://scenes/grappling_demo/right_hand.gd" id="10_kj527"]
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="11"]
 [ext_resource type="PackedScene" uid="uid://5ommq5on6irw" path="res://scenes/grappling_demo/objects/moving_platforms.tscn" id="12"]
 [ext_resource type="PackedScene" uid="uid://deyk5frilshws" path="res://assets/meshes/control_pad/control_pad_location_right.tscn" id="12_mvj1t"]
@@ -104,12 +108,34 @@ size = Vector3(100, 16, 2)
 shader = ExtResource("23_qgpbs")
 shader_parameter/curvature = 4.0
 
-[node name="GrapplingDemo" node_paths=PackedStringArray("basic_map") instance=ExtResource("1")]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ux8qw"]
+radius = 0.55
+height = 2.6
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_k2uno"]
+_data = {
+&"Attack": ExtResource("35_g7qj7"),
+&"Attack 2": ExtResource("37_wvbct"),
+&"Attack 3": ExtResource("38_yjptf"),
+&"Death": ExtResource("34_wcn35"),
+&"Running": ExtResource("36_wcn35"),
+&"enemyidle": ExtResource("33_r85co"),
+&"hitted": ExtResource("32_r85co"),
+&"hitted 2": ExtResource("39_8wxhm")
+}
+
+[node name="GrapplingDemo" node_paths=PackedStringArray("basic_map", "punch_area") instance=ExtResource("1")]
 script = ExtResource("2_lm0po")
 basic_map = NodePath("BasicMap")
+punch_area = NodePath("XROrigin3D/LeftHand/Area3D")
 
 [node name="XROrigin3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
+script = ExtResource("3_iuiv0")
+
+[node name="LeftHand" parent="XROrigin3D" index="1"]
+script = ExtResource("10_kj527")
+projectile_scene = ExtResource("5_r85co")
 
 [node name="LeftHand" parent="XROrigin3D/LeftHand" index="0" instance=ExtResource("2_7xgbg")]
 
@@ -158,6 +184,21 @@ jump_button_action = "ax_button"
 ranged_enable = false
 
 [node name="ControlPadLocationLeft" parent="XROrigin3D/LeftHand" index="4" instance=ExtResource("8_bqtqi")]
+
+[node name="Area3D" type="Area3D" parent="XROrigin3D/LeftHand" index="5"]
+collision_mask = 2
+script = ExtResource("9_os25x")
+
+[node name="Hitbox left" type="CollisionShape3D" parent="XROrigin3D/LeftHand/Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00107783, -0.0463601, 0.0609112)
+shape = SubResource("SphereShape3D_27jkk")
+
+[node name="RayCast3D" type="RayCast3D" parent="XROrigin3D/LeftHand" index="6"]
+target_position = Vector3(0, 0, -10)
+
+[node name="RightHand" parent="XROrigin3D" index="2" groups=["player_body"]]
+script = ExtResource("10_kj527")
+projectile_scene = ExtResource("5_r85co")
 
 [node name="RightHand" parent="XROrigin3D/RightHand" index="0" instance=ExtResource("6_n2v2n")]
 
@@ -212,9 +253,18 @@ ranged_enable = false
 
 [node name="ControlPadLocationRight" parent="XROrigin3D/RightHand" index="6" instance=ExtResource("12_mvj1t")]
 
-[node name="PlayerBody" parent="XROrigin3D" index="3" instance=ExtResource("11")]
+[node name="Area3D" type="Area3D" parent="XROrigin3D/RightHand" index="7"]
+collision_mask = 2
+script = ExtResource("9_os25x")
+
+[node name="Hitbox Right" type="CollisionShape3D" parent="XROrigin3D/RightHand/Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00107783, -0.0463601, 0.0609112)
+shape = SubResource("SphereShape3D_27jkk")
+
+[node name="PlayerBody" parent="XROrigin3D" index="3" groups=["player"] instance=ExtResource("11")]
 disable_mode = 2
 collision_layer = 524289
+collision_mask = 1021
 
 [node name="MovementClimb" parent="XROrigin3D" index="4" instance=ExtResource("4")]
 
@@ -232,9 +282,10 @@ transform = Transform3D(0.866025, -0.321394, 0.383022, 0, 0.766044, 0.642788, -0
 light_energy = 0.8
 
 [node name="Ground" type="StaticBody3D" parent="BasicMap" index="2" groups=["ground"]]
+collision_layer = 4
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BasicMap/Ground" index="0"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0.148104, -0.322633, -0.555099)
 mesh = SubResource("7")
 surface_material_override/0 = ExtResource("18_g75eo")
 
@@ -244,6 +295,7 @@ shape = SubResource("6")
 
 [node name="Wall1" type="StaticBody3D" parent="BasicMap" index="3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -48)
+collision_layer = 4
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BasicMap/Wall1" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
@@ -273,6 +325,7 @@ shape = SubResource("4")
 
 [node name="Wall3" type="StaticBody3D" parent="BasicMap" index="5"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 48)
+collision_layer = 4
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BasicMap/Wall3" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
@@ -286,6 +339,8 @@ shape = SubResource("4")
 
 [node name="Wall4" type="StaticBody3D" parent="BasicMap" index="6"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -48, 0, 0)
+collision_layer = 4
+collision_mask = 3
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BasicMap/Wall4" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
@@ -308,29 +363,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 24)
 
 [node name="Tower1" parent="Towers" index="0" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -2, -8)
+collision_layer = 262160
 
 [node name="Tower2" parent="Towers" index="1" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+collision_layer = 262160
 
 [node name="Tower3" parent="Towers" index="2" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -2, -8)
+collision_layer = 262160
 
 [node name="Tower4" parent="Towers" index="3" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+collision_layer = 262160
 
 [node name="Tower5" parent="Towers" index="4" instance=ExtResource("18")]
+collision_layer = 262160
 
 [node name="Tower6" parent="Towers" index="5" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+collision_layer = 262160
 
 [node name="Tower7" parent="Towers" index="6" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -2, 8)
+collision_layer = 262160
 
 [node name="Tower8" parent="Towers" index="7" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+collision_layer = 262160
 
 [node name="Tower9" parent="Towers" index="8" instance=ExtResource("18")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, -2, 8)
+collision_layer = 262160
 
 [node name="MovingPlatformsLow" parent="." index="5" instance=ExtResource("12")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
@@ -363,6 +427,32 @@ position = Vector2(576, 321)
 xr_camera = NodePath("../../../XROrigin3D/XRCamera3D")
 
 [node name="Enemy" type="Node3D" parent="." index="8"]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." index="9" node_paths=PackedStringArray("anim_player") groups=["enemy"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.3348)
+collision_layer = 2
+collision_mask = 21
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+script = ExtResource("27_ux8qw")
+anim_player = NodePath("AnimationPlayer2")
+
+[node name="Hitbox enemy" type="CollisionShape3D" parent="CharacterBody3D" index="0" groups=["enemy"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.901331, 0)
+shape = SubResource("CapsuleShape3D_ux8qw")
+
+[node name="brute" parent="CharacterBody3D" index="1" groups=["enemy"] instance=ExtResource("31_iuiv0")]
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="CharacterBody3D" index="2"]
+root_node = NodePath("../brute")
+libraries = {
+&"enemy": SubResource("AnimationLibrary_k2uno")
+}
+autoplay = "enemy/enemyidle"
+
+[connection signal="body_entered" from="XROrigin3D/LeftHand/Area3D" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_entered" from="XROrigin3D/RightHand/Area3D" to="." method="_on_area_3d_body_entered"]
 
 [editable path="XROrigin3D/LeftHand/LeftHand"]
 [editable path="XROrigin3D/LeftHand/LeftHand/Hand_Nails_low_L"]
