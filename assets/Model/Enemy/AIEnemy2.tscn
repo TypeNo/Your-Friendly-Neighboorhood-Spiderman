@@ -43,9 +43,9 @@ anim_player = NodePath("AnimationPlayer2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.901331, 0)
 shape = SubResource("CapsuleShape3D_ux8qw")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." groups=["enemy"]]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" groups=["enemy"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.103638, 0.860417, 0.131836)
 shape = SubResource("BoxShape3D_eycov")
 

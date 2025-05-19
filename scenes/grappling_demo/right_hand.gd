@@ -18,7 +18,7 @@ func _process(delta):
 	velocity = (global_position - _last_position) / delta
 	_last_position = global_position
 	
-	if is_button_pressed("trigger_click") and can_shoot:
+	if is_button_pressed("by_button") and can_shoot:
 		# Fire rate limiter
 		can_shoot = false
 		get_tree().create_timer(fire_rate).connect("timeout", func(): can_shoot = true)

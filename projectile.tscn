@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bjs4fdhjhfcst"]
 
-[ext_resource type="Script" path="res://rigid_body_3d.gd" id="1_a85iw"]
+[ext_resource type="Script" uid="uid://br1skt7cfh68y" path="res://rigid_body_3d.gd" id="1_a85iw"]
 [ext_resource type="PackedScene" uid="uid://cw47116y8oulq" path="res://web_effect.tscn" id="2_dgwo2"]
 [ext_resource type="Material" uid="uid://d1p1c1u42xlin" path="res://Materials/projectile.tres" id="2_qxf0c"]
 

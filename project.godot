@@ -45,6 +45,7 @@ singletons=["res://addons/godot-openxr/config/godot_openxr.gdnlib"]
 
 enemy=""
 web=""
+player=""
 
 [gui]
 
@@ -100,7 +101,6 @@ limits/time/time_rollover_secs=30.0
 
 [xr]
 
-openxr/enabled=true
 openxr/foveation_level=3
 openxr/foveation_dynamic=true
 shaders/enabled=true

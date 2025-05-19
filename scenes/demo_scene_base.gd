@@ -10,29 +10,26 @@ var ground_center: Vector3
 
 func _ready():
 	super()
+
 	#var webxr_interface = XRServer.find_interface("WebXR")
 	#if webxr_interface:
-	#	print("WebXR interface found.")
-	#	XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
-	#	_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
-	#	get_viewport().use_xr = true
+		#print("WebXR interface found.")
+		#XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
+		#_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
 	#else:
-	#	push_warning("WebXR interface not found.")
-	
-	
-	var xr_interface = XRServer.find_interface("OpenXR")
-	# 
+		#push_warning("WebXR interface not found.")
+	var xr_interface: XRInterface
+	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface and xr_interface.is_initialized():
 		print("OpenXR initialized successfully")
-	# 
-	#     # Turn off v-sync!
+
+		# Turn off v-sync!
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	# 
-	#     # Change our main viewport to output to the HMD
+
+		# Change our main viewport to output to the HMD
 		get_viewport().use_xr = true
 	else:
 		print("OpenXR not initialized, please check if your headset is connected")
-
 	# Ensure basic_map is assigned (possibly by exporting it or assigning via script)
 	if not basic_map:
 		push_error("basic_map is not assigned.")
