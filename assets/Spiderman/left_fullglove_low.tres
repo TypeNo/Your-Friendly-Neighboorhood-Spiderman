@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://ccja65l11ung5"]
+
+[ext_resource type="Texture2D" uid="uid://cwidrk7hxxhfb" path="res://assets/Spiderman/webtexture.jpg" id="1_6i832"]
+
+[resource]
+albedo_texture = ExtResource("1_6i832")

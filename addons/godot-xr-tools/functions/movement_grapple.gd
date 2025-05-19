@@ -146,8 +146,9 @@ func _physics_process(_delta : float):
 var _swing_button := false
 
 const MAX_ROPE_LENGTH :=10.0  # Max distance before rope snaps
-const SPRING_CONSTANT := 4.0   # Strength of swing tightening
+const SPRING_CONSTANT := 2.5   # Strength of swing tightening
 const TENSION_DAMPING := 0.2   # Swing damping factor
+const MAX_TENSION_FORCE:=200.0
 var max_rope_length
 
 # State transition
@@ -244,6 +245,8 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 		var overstretch = hook_length - MAX_ROPE_LENGTH + SLACK_MARGIN
 		if overstretch > 0.0:
 			var tension_force = hook_dir * overstretch * SPRING_CONSTANT
+			if tension_force.length() > MAX_TENSION_FORCE:
+				tension_force = tension_force.normalized() * MAX_TENSION_FORCE
 			player_body.velocity += tension_force * delta
 
 		if hook_length < MAX_ROPE_LENGTH:
@@ -261,6 +264,7 @@ func physics_movement(delta: float, player_body: XRToolsPlayerBody, disabled: bo
 		# Optional damping (comment out if you want maximum swing energy)
 		const TENSION_DAMPING := 4.0
 		player_body.velocity *= (1.0 - TENSION_DAMPING * delta)
+		#player_body.velocity *= 1.0 - friction * delta
 
 	# Final movement
 	player_body.velocity = player_body.move_player(player_body.velocity)

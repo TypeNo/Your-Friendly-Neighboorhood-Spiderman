@@ -17,9 +17,9 @@ color = Color(0, 0, 0, 0.87451)
 [node name="Description" type="RichTextLabel" parent="."]
 layout_mode = 0
 offset_left = 10.0
-offset_top = 10.0
+offset_top = 4.0
 offset_right = 390.0
-offset_bottom = 240.0
+offset_bottom = 251.0
 theme_override_constants/line_separation = -3
 theme_override_font_sizes/normal_font_size = 12
 text = "Your Friendly Neighbourhood Spiderman
@@ -28,12 +28,14 @@ The Controls:
  > Left Controller:
    - Direct Movement: U/D/L/R Joystick
    - Jumping: A/X Button
+   - Web Shooting: B/Y Button
    - Climbing: Grip when you attach to the building
    - Swinging: Grip
  > Right Controller:
    - Direct Movement: U/D Joystick
    - Turning: L/R Joystick
    - Jumping: A/X Button
+   - Web Shooting: B/Y Button
    - Climbing: Grip when you attach to the building
    - Grapple: Trigger
    - Swinging: Grip

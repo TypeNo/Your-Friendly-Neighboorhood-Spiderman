@@ -13,11 +13,17 @@ func _ready():
 
 	#var webxr_interface = XRServer.find_interface("WebXR")
 	#if webxr_interface:
-		#print("WebXR interface found.")
-		#XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
-		#_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
+	#	XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
+	#	_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
+	
+	#var webxr_interface = XRServer.find_interface("WebXR")
+	#if webxr_interface:
+	#	print("WebXR interface found.")
+	#	XRToolsUserSettings.webxr_primary_changed.connect(self._on_webxr_primary_changed)
+	#	_on_webxr_primary_changed(XRToolsUserSettings.get_real_webxr_primary())
+		#get_viewport().use_xr = true
 	#else:
-		#push_warning("WebXR interface not found.")
+	#	push_warning("WebXR interface not found.")
 	var xr_interface: XRInterface
 	xr_interface = XRServer.find_interface("OpenXR")
 	if xr_interface and xr_interface.is_initialized():
@@ -25,6 +31,7 @@ func _ready():
 
 		# Turn off v-sync!
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		
 
 		# Change our main viewport to output to the HMD
 		get_viewport().use_xr = true
